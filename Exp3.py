@@ -49,16 +49,19 @@ class Exp3:
         act = np.zeros((self.K,self.M))
         for i in range(0,self.K):
             for j in range (0,self.M):
-                if abs(arm_sum[j] - 0) < 0.01 :
-                    u[i] += 0
-                else:
-                    act[i][j] = float(arm[i][j]/arm_sum[j])
-                    u[i] += (alpha*self.rho[i][j]*(1-math.exp(-act[i][j]/self.rho[i][j])) -self.kappa[i][j]*arm[i][j])
-        
-            noise = gn.Gaussian_noise(1,0,1,[-1,1])
+                act[i][j] = float(arm[i][j]/(arm_sum[j]-arm[i][j]+1))
+                #u[i] += (alpha*self.rho[i][j]*(1-math.exp(-act[i][j]/self.rho[i][j])) -self.kappa[i][j]*arm[i][j])
+                u[i] += alpha*math.log(1+act[i][j]*(10*self.rho[i][j])) -self.kappa[i][j]*arm[i][j]
+                #if abs(arm_sum[j] - 0) < 0.01 :
+                    #u[i] += 0
+                #else:
+                    #act[i][j] = float(arm[i][j]/arm_sum[j])
+                    #u[i] += (alpha*self.rho[i][j]*(1-math.exp(-act[i][j]/self.rho[i][j])) -self.kappa[i][j]*arm[i][j])
+                    #u[i] += alpha*act[i][j]/self.rho[i][j] - self.kappa[i][j]*arm[i][j]
+            noise = gn.Gaussian_noise(1,0,0.01,[-0.1,0.1])
             u[i] += noise.sample_trunc()
         
-        u -= beta*(1-np.sum(act)/self.M)
+        #u -= beta*(1-np.sum(act)/self.M)
         return u
 
     def distr(self,weights, gamma=0.0):
